@@ -1,85 +1,100 @@
 # 🤖 Sistema Multi-Agente para Criação de Descrições de Vagas
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/lucianoon/multi-agents-recrutadores/actions/workflows/ci.yml/badge.svg)](https://github.com/lucianoon/multi-agents-recrutadores/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.10%E2%80%933.13-blue.svg)](https://www.python.org/downloads/)
 [![CrewAI](https://img.shields.io/badge/CrewAI-0.28.8-orange.svg)](https://github.com/joaomdmoura/crewAI)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Sistema inteligente baseado em agentes de IA para automatizar a criação de descrições de vagas de alta qualidade, economizando até **80% do tempo** da equipe de RH.
+Sistema multi-agente em Python, construído com o framework **CrewAI**, que automatiza a criação de descrições de vagas: pesquisa a cultura da empresa e o mercado, redige a publicação e a revisa, gerando um arquivo `job_posting.md` pronto para uso.
 
 ## 📋 Índice
 
-- [Visão Geral](#visão-geral)
-- [Características](#características)
-- [Arquitetura](#arquitetura)
-- [Instalação](#instalação)
-- [Uso](#uso)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Documentação](#documentação)
-- [Benefícios](#benefícios)
-- [Contribuindo](#contribuindo)
-- [Licença](#licença)
+- [Visão Geral](#-visão-geral)
+- [Arquitetura](#-arquitetura)
+- [Pré-requisitos](#-pré-requisitos)
+- [Instalação](#-instalação)
+- [Uso](#-uso)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Testes](#-testes)
+- [Documentação](#-documentação)
+- [Contribuindo](#-contribuindo)
+- [Licença](#-licença)
 
 ## 🎯 Visão Geral
 
-Este projeto implementa um sistema multi-agente utilizando o framework **CrewAI** para automatizar o processo de criação de descrições de vagas. O sistema é composto por três agentes especializados que trabalham em harmonia:
+O sistema orquestra três agentes especializados que executam cinco tarefas em sequência:
 
-1. **Agente Pesquisador** - Analisa a cultura empresarial e requisitos da vaga
-2. **Agente Redator** - Cria descrições envolventes e alinhadas com a marca
-3. **Agente Revisor** - Garante qualidade, clareza e alinhamento cultural
+1. **Analista de Pesquisa** — analisa o site e a descrição da empresa, levanta requisitos da vaga e faz análise da indústria
+2. **Redator de Descrição de Vaga** — transforma os insights da pesquisa em um rascunho envolvente da publicação
+3. **Especialista em Revisão e Edição** — revisa clareza, gramática e alinhamento cultural, e salva o resultado final
 
-## ✨ Características
-
-- 🚀 **Economia de 80% do tempo** na criação de descrições de vagas
-- 🎯 **Consistência garantida** em todas as publicações
-- 🏢 **Alinhamento cultural** automático com os valores da empresa
-- 📊 **Análise de indústria** integrada para contexto competitivo
-- ✅ **Zero erros** gramaticais e de formatação
-- 🔄 **Processo automatizado** de pesquisa, criação e revisão
+A entrada é interativa (domínio da empresa, descrição, vaga e benefícios) e a saída é a descrição da vaga finalizada em Markdown.
 
 ## 🏗️ Arquitetura
 
-O sistema utiliza uma arquitetura de agentes especializados orquestrados pelo CrewAI:
+Os agentes são definidos em `src/agents.py`, as tarefas em `src/tasks.py` e a orquestração (Crew com `Process.sequential`) em `src/main.py`. Fluxo real do código:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   Sistema Multi-Agente                   │
-├─────────────────────────────────────────────────────────┤
-│                                                           │
-│  ┌──────────────┐    ┌──────────────┐    ┌───────────┐ │
-│  │   Agente     │───▶│   Agente     │───▶│  Agente   │ │
-│  │ Pesquisador  │    │   Redator    │    │  Revisor  │ │
-│  └──────────────┘    └──────────────┘    └───────────┘ │
-│         │                    │                   │       │
-│         ▼                    ▼                   ▼       │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │         Descrição de Vaga Finalizada             │  │
-│  └──────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
+Entradas do usuário (via terminal):
+  domínio da empresa · descrição da empresa · vaga · benefícios
+        │
+        ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Crew (CrewAI, processo sequencial)             │
+│                                                             │
+│  Agente: Analista de Pesquisa                               │
+│  Ferramentas: WebsiteSearchTool, SerperDevTool              │
+│  ├─ 1. research_company_culture_task                        │
+│  │     (cultura, valores e missão da empresa)               │
+│  ├─ 2. research_role_requirements_task                      │
+│  │     (habilidades e qualificações do candidato ideal)     │
+│  └─ 3. industry_analysis_task                               │
+│        (tendências, desafios e oportunidades do setor)      │
+│        │                                                    │
+│        ▼                                                    │
+│  Agente: Redator de Descrição de Vaga                       │
+│  Ferramentas: WebsiteSearchTool, SerperDevTool,             │
+│               FileReadTool (exemplo de descrição)           │
+│  └─ 4. draft_job_posting_task                               │
+│        (rascunho da publicação da vaga)                     │
+│        │                                                    │
+│        ▼                                                    │
+│  Agente: Especialista em Revisão e Edição                   │
+│  Ferramentas: WebsiteSearchTool, SerperDevTool,             │
+│               FileReadTool                                  │
+│  └─ 5. review_and_edit_job_posting_task                     │
+│        (versão final → output_file)                         │
+└─────────────────────────────────────────────────────────────┘
+        │
+        ▼
+   job_posting.md
 ```
 
-### Fluxo de Trabalho
+Como o processo é sequencial, a saída de cada tarefa serve de contexto para a seguinte.
 
-1. **Pesquisa e Análise**: O Agente Pesquisador coleta informações sobre a empresa, cultura e requisitos da vaga
-2. **Criação de Conteúdo**: O Agente Redator transforma os insights em uma descrição envolvente
-3. **Revisão e Refinamento**: O Agente Revisor garante qualidade e alinhamento final
+### Ferramentas utilizadas pelos agentes
+
+- **WebsiteSearchTool** — busca semântica no conteúdo do site da empresa
+- **SerperDevTool** — pesquisa na web via API do Serper
+- **FileReadTool** — lê um exemplo de descrição de vaga (`job_description_example.md`) como referência de formato
+
+## ✅ Pré-requisitos
+
+- Python 3.10 a 3.13 (o CI usa 3.12)
+- Chave de API da OpenAI (`OPENAI_API_KEY`)
+- Chave de API do Serper (`SERPER_API_KEY`) — https://serper.dev/
+
+As chaves só são necessárias para **executar** o sistema; os testes rodam sem chaves reais.
 
 ## 🛠️ Instalação
 
-### Pré-requisitos
-
-- Python 3.9 ou superior
-- Chave de API da OpenAI
-- Chave de API do Serper (para pesquisa web)
-
-### Passos
-
 1. Clone o repositório:
 ```bash
-git clone https://github.com/seu-usuario/multi-agents-recrutadores.git
+git clone https://github.com/lucianoon/multi-agents-recrutadores.git
 cd multi-agents-recrutadores
 ```
 
-2. Crie um ambiente virtual:
+2. Crie e ative um ambiente virtual:
 ```bash
 python -m venv venv
 source venv/bin/activate  # No Windows: venv\Scripts\activate
@@ -92,54 +107,57 @@ pip install -r requirements.txt
 
 4. Configure as variáveis de ambiente:
 ```bash
+# Linux/Mac:
 export OPENAI_API_KEY="sua-chave-openai"
 export SERPER_API_KEY="sua-chave-serper"
+
+# Windows (PowerShell):
+$env:OPENAI_API_KEY="sua-chave-openai"
+$env:SERPER_API_KEY="sua-chave-serper"
 ```
 
 ## 🚀 Uso
-
-### Execução Básica
 
 ```bash
 cd src
 python main.py
 ```
 
-O sistema solicitará as seguintes informações:
+O sistema solicitará quatro informações e executará os agentes em sequência:
 
-- **Domínio/Site da empresa**: URL do site da empresa
-- **Descrição da empresa**: Breve descrição do negócio
-- **Vaga a ser criada**: Título e descrição básica da posição
-- **Benefícios específicos**: Benefícios oferecidos pela empresa
+```
+Domínio/Site da empresa (ex: www.empresa.com.br): www.exemplo.com.br
+Descrição breve da empresa: Empresa de tecnologia focada em soluções de RH
+Vaga a ser criada (ex: Desenvolvedor Python Sênior): Desenvolvedor Python Sênior
+Benefícios específicos oferecidos: Trabalho remoto, plano de saúde, vale refeição
+```
 
-### Exemplo de Uso
+Ao final, a descrição da vaga é salva em `job_posting.md` (no diretório de execução) e também exibida no terminal. Um exemplo de saída está em [`examples/job_description_example.md`](examples/job_description_example.md).
+
+### Uso programático
 
 ```python
+from crewai import Crew, Process
 from agents import Agents
 from tasks import Tasks
-from crewai import Crew, Process
 
-# Inicializar agentes
 agents = Agents()
 research_agent = agents.research_agent()
 writer_agent = agents.writer_agent()
 review_agent = agents.review_agent()
 
-# Definir tarefas
 tasks = Tasks()
-research_task = tasks.research_company_culture_task(
-    research_agent, 
-    "Empresa de tecnologia inovadora", 
-    "www.empresa.com.br"
-)
-
-# Criar e executar a equipe
 crew = Crew(
     agents=[research_agent, writer_agent, review_agent],
-    tasks=[research_task, ...],
-    process=Process.sequential
+    tasks=[
+        tasks.research_company_culture_task(research_agent, "Empresa de tecnologia", "www.exemplo.com.br"),
+        tasks.research_role_requirements_task(research_agent, "Desenvolvedor Python Sênior"),
+        tasks.industry_analysis_task(research_agent, "www.exemplo.com.br", "Empresa de tecnologia"),
+        tasks.draft_job_posting_task(writer_agent, "Empresa de tecnologia", "Desenvolvedor Python Sênior", "Trabalho remoto"),
+        tasks.review_and_edit_job_posting_task(review_agent, "Desenvolvedor Python Sênior"),
+    ],
+    process=Process.sequential,
 )
-
 result = crew.kickoff()
 ```
 
@@ -147,49 +165,47 @@ result = crew.kickoff()
 
 ```
 multi-agents-recrutadores/
+├── .github/
+│   └── workflows/
+│       └── ci.yml                  # Pipeline de CI (GitHub Actions)
 ├── src/
-│   ├── agents.py              # Definição dos agentes
-│   ├── tasks.py               # Definição das tarefas
-│   └── main.py                # Script principal de execução
+│   ├── agents.py                   # Definição dos 3 agentes e suas ferramentas
+│   ├── tasks.py                    # Definição das 5 tarefas
+│   └── main.py                     # Orquestração (Crew) e execução interativa
+├── tests/
+│   ├── conftest.py                 # Configuração dos testes (chaves falsas, sys.path)
+│   ├── test_agents.py              # Testes estruturais dos agentes
+│   ├── test_tasks.py               # Testes das tarefas e do encadeamento
+│   └── test_main.py                # Teste de fumaça do módulo principal
 ├── docs/
-│   ├── documentation.md       # Documentação técnica completa
-│   ├── roteiro_apresentacao.md # Roteiro para apresentação
-│   └── linkedin_post.md       # Post para LinkedIn
-├── assets/                    # Imagens e recursos visuais
-├── examples/                  # Exemplos de uso
-├── requirements.txt           # Dependências do projeto
-├── README.md                  # Este arquivo
-└── LICENSE                    # Licença do projeto
+│   ├── documentation.md            # Documentação técnica completa
+│   ├── roteiro_apresentacao.md     # Roteiro para apresentação
+│   └── linkedin_post.md            # Post para LinkedIn
+├── examples/
+│   └── job_description_example.md  # Exemplo de descrição de vaga gerada
+├── QUICK_START.md                  # Guia rápido de início
+├── requirements.txt                # Dependências do projeto
+├── README.md                       # Este arquivo
+└── LICENSE                         # Licença MIT
 ```
+
+## 🧪 Testes
+
+Os testes são **estruturais**: validam a construção dos agentes (papéis, objetivos, ferramentas), das tarefas (descrições, saídas esperadas, arquivo de saída) e o encadeamento entre agentes e tarefas — **sem chamar LLMs nem exigir chaves de API reais** (chaves falsas são definidas em `tests/conftest.py`).
+
+```bash
+pip install -r requirements.txt pytest
+pytest tests/ -v
+```
+
+O mesmo conjunto de testes roda automaticamente no GitHub Actions a cada push e pull request para `main` (ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## 📚 Documentação
 
-A documentação completa do projeto está disponível em:
-
-- **[Documentação Técnica](docs/documentation.md)**: Análise detalhada da arquitetura e componentes
-- **[Roteiro de Apresentação](docs/roteiro_apresentacao.md)**: Guia completo para apresentar a solução
-- **[Post LinkedIn](docs/linkedin_post.md)**: Conteúdo pronto para divulgação
-
-## 💎 Benefícios
-
-### Economia de Tempo
-
-- **80% de redução** no tempo de criação (de 3-5 horas para 15 minutos)
-- Automação completa de pesquisa e análise
-- Revisão instantânea sem múltiplas rodadas
-
-### Melhoria de Qualidade
-
-- **Consistência 100%** em todas as descrições
-- Alinhamento cultural preciso e automático
-- Zero erros gramaticais ou de formatação
-
-### Impacto no Negócio
-
-- Maior produtividade da equipe de RH
-- Fortalecimento da marca empregadora
-- Escalabilidade para múltiplas vagas simultâneas
-- **ROI em menos de 3 meses**
+- **[Guia Rápido](QUICK_START.md)**: comece a usar em poucos minutos
+- **[Documentação Técnica](docs/documentation.md)**: análise detalhada da arquitetura e componentes
+- **[Roteiro de Apresentação](docs/roteiro_apresentacao.md)**: guia para apresentar a solução
+- **[Post LinkedIn](docs/linkedin_post.md)**: conteúdo para divulgação
 
 ## 🤝 Contribuindo
 
@@ -201,13 +217,11 @@ Contribuições são bem-vindas! Para contribuir:
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
+Antes de abrir o PR, garanta que `pytest tests/` passa localmente.
+
 ## 📄 Licença
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 📧 Contato
-
-Para dúvidas, sugestões ou demonstrações, entre em contato através do LinkedIn.
 
 ---
 
