@@ -48,3 +48,7 @@ Thumbs.db
 
 # CrewAI
 .crewai/
+db/
+
+# Pytest
+.pytest_cache/
