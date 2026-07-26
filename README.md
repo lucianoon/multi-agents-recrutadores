@@ -1,140 +1,166 @@
-# 🤖 Sistema Multi-Agente para Criação de Descrições de Vagas
+# 🤖 Multi-Agent System for Writing Job Descriptions
+
+*[Versão em português](README.pt-BR.md)*
 
 [![CI](https://github.com/lucianoon/multi-agents-recrutadores/actions/workflows/ci.yml/badge.svg)](https://github.com/lucianoon/multi-agents-recrutadores/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.10%E2%80%933.13-blue.svg)](https://www.python.org/downloads/)
 [![CrewAI](https://img.shields.io/badge/CrewAI-0.28.8-orange.svg)](https://github.com/joaomdmoura/crewAI)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Sistema multi-agente em Python, construído com o framework **CrewAI**, que automatiza a criação de descrições de vagas: pesquisa a cultura da empresa e o mercado, redige a publicação e a revisa, gerando um arquivo `job_posting.md` pronto para uso.
+A multi-agent system in Python, built on the **CrewAI** framework, that
+automates writing job descriptions: it researches the company's culture and the
+market, drafts the posting and reviews it, producing a ready-to-use
+`job_posting.md`.
 
-## 📋 Índice
+> **Note on language:** the agents' roles, goals and prompts are written in
+> Portuguese in `src/agents.py` and `src/tasks.py`, and the interactive CLI
+> prompts in Portuguese too. The system therefore produces **job descriptions in
+> Portuguese**. This README is a translation of the documentation, not of the
+> pipeline's output.
 
-- [Visão Geral](#-visão-geral)
-- [Arquitetura](#-arquitetura)
-- [Pré-requisitos](#-pré-requisitos)
-- [Instalação](#-instalação)
-- [Uso](#-uso)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Testes](#-testes)
-- [Documentação](#-documentação)
-- [Contribuindo](#-contribuindo)
-- [Licença](#-licença)
+## Table of contents
 
-## 🎯 Visão Geral
+- [Overview](#-overview)
+- [Architecture](#-architecture)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Project structure](#-project-structure)
+- [Tests](#-tests)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-O sistema orquestra três agentes especializados que executam cinco tarefas em sequência:
+## 🎯 Overview
 
-1. **Analista de Pesquisa** — analisa o site e a descrição da empresa, levanta requisitos da vaga e faz análise da indústria
-2. **Redator de Descrição de Vaga** — transforma os insights da pesquisa em um rascunho envolvente da publicação
-3. **Especialista em Revisão e Edição** — revisa clareza, gramática e alinhamento cultural, e salva o resultado final
+The system orchestrates three specialized agents running five tasks in sequence:
 
-A entrada é interativa (domínio da empresa, descrição, vaga e benefícios) e a saída é a descrição da vaga finalizada em Markdown.
+1. **Analista de Pesquisa** (research analyst) — analyzes the company's website
+   and description, gathers the role's requirements and runs an industry analysis
+2. **Redator de Descrição de Vaga** (job description writer) — turns the research
+   insights into an engaging draft of the posting
+3. **Especialista em Revisão e Edição** (review and editing specialist) — reviews
+   clarity, grammar and cultural alignment, then saves the final result
 
-## 🏗️ Arquitetura
+Input is interactive (company domain, description, role and benefits) and the
+output is the finished job description in Markdown.
 
-Os agentes são definidos em `src/agents.py`, as tarefas em `src/tasks.py` e a orquestração (Crew com `Process.sequential`) em `src/main.py`. Fluxo real do código:
+## 🏗️ Architecture
+
+Agents are defined in `src/agents.py`, tasks in `src/tasks.py`, and the
+orchestration (a Crew with `Process.sequential`) in `src/main.py`. The actual
+flow in the code:
 
 ```
-Entradas do usuário (via terminal):
-  domínio da empresa · descrição da empresa · vaga · benefícios
+User input (via terminal):
+  company domain · company description · role · benefits
         │
         ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              Crew (CrewAI, processo sequencial)             │
+│              Crew (CrewAI, sequential process)              │
 │                                                             │
-│  Agente: Analista de Pesquisa                               │
-│  Ferramentas: WebsiteSearchTool, SerperDevTool              │
+│  Agent: Analista de Pesquisa (research analyst)             │
+│  Tools: WebsiteSearchTool, SerperDevTool                    │
 │  ├─ 1. research_company_culture_task                        │
-│  │     (cultura, valores e missão da empresa)               │
+│  │     (company culture, values and mission)                │
 │  ├─ 2. research_role_requirements_task                      │
-│  │     (habilidades e qualificações do candidato ideal)     │
+│  │     (ideal candidate's skills and qualifications)        │
 │  └─ 3. industry_analysis_task                               │
-│        (tendências, desafios e oportunidades do setor)      │
+│        (sector trends, challenges and opportunities)        │
 │        │                                                    │
 │        ▼                                                    │
-│  Agente: Redator de Descrição de Vaga                       │
-│  Ferramentas: WebsiteSearchTool, SerperDevTool,             │
-│               FileReadTool (exemplo de descrição)           │
+│  Agent: Redator de Descrição de Vaga (writer)               │
+│  Tools: WebsiteSearchTool, SerperDevTool,                   │
+│         FileReadTool (sample job description)               │
 │  └─ 4. draft_job_posting_task                               │
-│        (rascunho da publicação da vaga)                     │
+│        (draft of the job posting)                           │
 │        │                                                    │
 │        ▼                                                    │
-│  Agente: Especialista em Revisão e Edição                   │
-│  Ferramentas: WebsiteSearchTool, SerperDevTool,             │
-│               FileReadTool                                  │
+│  Agent: Especialista em Revisão e Edição (reviewer)         │
+│  Tools: WebsiteSearchTool, SerperDevTool,                   │
+│         FileReadTool                                        │
 │  └─ 5. review_and_edit_job_posting_task                     │
-│        (versão final → output_file)                         │
+│        (final version → output_file)                        │
 └─────────────────────────────────────────────────────────────┘
         │
         ▼
    job_posting.md
 ```
 
-Como o processo é sequencial, a saída de cada tarefa serve de contexto para a seguinte.
+Because the process is sequential, each task's output becomes context for the
+next one.
 
-### Ferramentas utilizadas pelos agentes
+### Tools used by the agents
 
-- **WebsiteSearchTool** — busca semântica no conteúdo do site da empresa
-- **SerperDevTool** — pesquisa na web via API do Serper
-- **FileReadTool** — lê um exemplo de descrição de vaga (`job_description_example.md`) como referência de formato
+- **WebsiteSearchTool** — semantic search over the company website's content
+- **SerperDevTool** — web search through the Serper API
+- **FileReadTool** — reads a sample job description
+  (`job_description_example.md`) as a formatting reference
 
-## ✅ Pré-requisitos
+## ✅ Prerequisites
 
-- Python 3.10 a 3.13 (o CI usa 3.12)
-- Chave de API da OpenAI (`OPENAI_API_KEY`)
-- Chave de API do Serper (`SERPER_API_KEY`) — https://serper.dev/
+- Python 3.10 to 3.13 (CI uses 3.12)
+- An OpenAI API key (`OPENAI_API_KEY`)
+- A Serper API key (`SERPER_API_KEY`) — https://serper.dev/
 
-As chaves só são necessárias para **executar** o sistema; os testes rodam sem chaves reais.
+The keys are only needed to **run** the system; the tests run without real keys.
 
-## 🛠️ Instalação
+## 🛠️ Installation
 
-1. Clone o repositório:
+1. Clone the repository:
 ```bash
 git clone https://github.com/lucianoon/multi-agents-recrutadores.git
 cd multi-agents-recrutadores
 ```
 
-2. Crie e ative um ambiente virtual:
+2. Create and activate a virtual environment:
 ```bash
 python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Instale as dependências:
+3. Install the dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Configure as variáveis de ambiente:
+4. Configure the environment variables:
 ```bash
 # Linux/Mac:
-export OPENAI_API_KEY="sua-chave-openai"
-export SERPER_API_KEY="sua-chave-serper"
+export OPENAI_API_KEY="your-openai-key"
+export SERPER_API_KEY="your-serper-key"
 
 # Windows (PowerShell):
-$env:OPENAI_API_KEY="sua-chave-openai"
-$env:SERPER_API_KEY="sua-chave-serper"
+$env:OPENAI_API_KEY="your-openai-key"
+$env:SERPER_API_KEY="your-serper-key"
 ```
 
-## 🚀 Uso
+## 🚀 Usage
 
 ```bash
 cd src
 python main.py
 ```
 
-O sistema solicitará quatro informações e executará os agentes em sequência:
+The system asks for four inputs and then runs the agents in sequence. The
+prompts are in Portuguese, as shown here:
 
 ```
 Domínio/Site da empresa (ex: www.empresa.com.br): www.exemplo.com.br
+   → Company domain/website
 Descrição breve da empresa: Empresa de tecnologia focada em soluções de RH
+   → Short company description
 Vaga a ser criada (ex: Desenvolvedor Python Sênior): Desenvolvedor Python Sênior
+   → Role to create
 Benefícios específicos oferecidos: Trabalho remoto, plano de saúde, vale refeição
+   → Specific benefits offered
 ```
 
-Ao final, a descrição da vaga é salva em `job_posting.md` (no diretório de execução) e também exibida no terminal. Um exemplo de saída está em [`examples/job_description_example.md`](examples/job_description_example.md).
+At the end, the job description is saved to `job_posting.md` (in the working
+directory) and also printed to the terminal. A sample output lives in
+[`examples/job_description_example.md`](examples/job_description_example.md).
 
-### Uso programático
+### Programmatic use
 
 ```python
 from crewai import Crew, Process
@@ -161,68 +187,78 @@ crew = Crew(
 result = crew.kickoff()
 ```
 
-## 📁 Estrutura do Projeto
+## 📁 Project structure
 
 ```
 multi-agents-recrutadores/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                  # Pipeline de CI (GitHub Actions)
+│       └── ci.yml                  # CI pipeline (GitHub Actions)
 ├── src/
-│   ├── agents.py                   # Definição dos 3 agentes e suas ferramentas
-│   ├── tasks.py                    # Definição das 5 tarefas
-│   └── main.py                     # Orquestração (Crew) e execução interativa
+│   ├── agents.py                   # The 3 agents and their tools
+│   ├── tasks.py                    # The 5 tasks
+│   └── main.py                     # Orchestration (Crew) and interactive run
 ├── tests/
-│   ├── conftest.py                 # Configuração dos testes (chaves falsas, sys.path)
-│   ├── test_agents.py              # Testes estruturais dos agentes
-│   ├── test_tasks.py               # Testes das tarefas e do encadeamento
-│   └── test_main.py                # Teste de fumaça do módulo principal
+│   ├── conftest.py                 # Test setup (fake keys, sys.path)
+│   ├── test_agents.py              # Structural tests for the agents
+│   ├── test_tasks.py               # Tests for the tasks and their chaining
+│   └── test_main.py                # Smoke test for the main module
 ├── docs/
-│   ├── documentation.md            # Documentação técnica completa
-│   ├── roteiro_apresentacao.md     # Roteiro para apresentação
-│   └── linkedin_post.md            # Post para LinkedIn
+│   ├── documentation.md            # Full technical documentation
+│   ├── roteiro_apresentacao.md     # Presentation script
+│   └── linkedin_post.md            # LinkedIn post
 ├── examples/
-│   └── job_description_example.md  # Exemplo de descrição de vaga gerada
-├── QUICK_START.md                  # Guia rápido de início
-├── requirements.txt                # Dependências do projeto
-├── README.md                       # Este arquivo
-└── LICENSE                         # Licença MIT
+│   └── job_description_example.md  # Sample generated job description
+├── QUICK_START.md                  # Quick start guide
+├── requirements.txt                # Project dependencies
+├── README.md                       # This file
+└── LICENSE                         # MIT license
 ```
 
-## 🧪 Testes
+## 🧪 Tests
 
-Os testes são **estruturais**: validam a construção dos agentes (papéis, objetivos, ferramentas), das tarefas (descrições, saídas esperadas, arquivo de saída) e o encadeamento entre agentes e tarefas — **sem chamar LLMs nem exigir chaves de API reais** (chaves falsas são definidas em `tests/conftest.py`).
+The tests are **structural**: they validate how the agents are built (roles,
+goals, tools), how the tasks are built (descriptions, expected outputs, output
+file) and how agents and tasks chain together — **without calling any LLM or
+requiring real API keys** (fake keys are set in `tests/conftest.py`). The
+practical consequence is that CI is free and deterministic.
 
 ```bash
 pip install -r requirements.txt pytest
 pytest tests/ -v
 ```
 
-O mesmo conjunto de testes roda automaticamente no GitHub Actions a cada push e pull request para `main` (ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+The same test suite runs automatically on GitHub Actions on every push and pull
+request to `main` (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
-## 📚 Documentação
+## 📚 Documentation
 
-- **[Guia Rápido](QUICK_START.md)**: comece a usar em poucos minutos
-- **[Documentação Técnica](docs/documentation.md)**: análise detalhada da arquitetura e componentes
-- **[Roteiro de Apresentação](docs/roteiro_apresentacao.md)**: guia para apresentar a solução
-- **[Post LinkedIn](docs/linkedin_post.md)**: conteúdo para divulgação
+The documents below are in Portuguese.
 
-## 🤝 Contribuindo
+- **[Quick start](QUICK_START.md)**: get going in a few minutes
+- **[Technical documentation](docs/documentation.md)**: detailed analysis of the
+  architecture and components
+- **[Presentation script](docs/roteiro_apresentacao.md)**: guide for presenting
+  the solution
+- **[LinkedIn post](docs/linkedin_post.md)**: outreach content
 
-Contribuições são bem-vindas! Para contribuir:
+## 🤝 Contributing
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+Contributions are welcome. To contribute:
 
-Antes de abrir o PR, garanta que `pytest tests/` passa localmente.
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licença
+Before opening the PR, make sure `pytest tests/` passes locally.
 
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE)
+file for details.
 
 ---
 
-**Desenvolvido com ❤️ usando CrewAI e Python**
+**Built with ❤️ using CrewAI and Python**
