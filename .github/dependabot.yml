@@ -1,0 +1,45 @@
+version: 2
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # crewai e langchain estão fixados em 0.x antigos, e nessas bibliotecas o
+    # minor é onde a quebra vive: crewai reorganizou agentes e tasks, e langchain
+    # dividiu o pacote em core/community entre 0.1 e 0.3. Deixar o Dependabot
+    # propor esses saltos produziria PR toda semana que não dá para mergear —
+    # e PR que nunca fecha ensina a ignorar o Dependabot. Só patches aqui; a
+    # subida de série é migração deliberada.
+    ignore:
+      - dependency-name: "crewai"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      - dependency-name: "crewai-tools"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      - dependency-name: "langchain"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      - dependency-name: "langchain-openai"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      - dependency-name: "langchain-community"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+    groups:
+      python-dependencies:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns: ["*"]
