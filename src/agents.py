@@ -9,8 +9,7 @@ Este módulo define os agentes especializados que compõem o sistema:
 """
 
 from crewai import Agent
-from crewai_tools import SerperDevTool, WebsiteSearchTool, FileReadTool
-
+from crewai_tools import FileReadTool, SerperDevTool, WebsiteSearchTool
 
 # Inicialização das ferramentas
 web_search_tool = WebsiteSearchTool()

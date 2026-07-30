@@ -196,11 +196,13 @@ multi-agents-recrutadores/
 Os testes são **estruturais**: validam a construção dos agentes (papéis, objetivos, ferramentas), das tarefas (descrições, saídas esperadas, arquivo de saída) e o encadeamento entre agentes e tarefas — **sem chamar LLMs nem exigir chaves de API reais** (chaves falsas são definidas em `tests/conftest.py`).
 
 ```bash
-pip install -r requirements.txt pytest
+pip install -r requirements.txt pytest ruff mypy
+ruff check .    # lint
+mypy            # checagem de tipos
 pytest tests/ -v
 ```
 
-O mesmo conjunto de testes roda automaticamente no GitHub Actions a cada push e pull request para `main` (ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+Os mesmos três gates rodam automaticamente no GitHub Actions a cada push e pull request para `main` (ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ## 📚 Documentação
 
@@ -219,7 +221,7 @@ Contribuições são bem-vindas! Para contribuir:
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-Antes de abrir o PR, garanta que `pytest tests/` passa localmente.
+Antes de abrir o PR, garanta que `ruff check .`, `mypy` e `pytest tests/` passam localmente.
 
 ## 📄 Licença
 
