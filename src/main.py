@@ -7,6 +7,7 @@ descrições de vagas de alta qualidade de forma automatizada.
 """
 
 from crewai import Crew, Process
+
 from agents import Agents
 from tasks import Tasks
 

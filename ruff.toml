@@ -1,0 +1,21 @@
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+
+[lint.per-file-ignores]
+# agents.py e tasks.py são majoritariamente texto de prompt em linguagem
+# natural. Quebrar essas linhas mudaria o conteúdo enviado ao modelo, então
+# E501 fica desligado só aqui — o resto do código segue limitado a 100 colunas.
+"src/agents.py" = ["E501"]
+"src/tasks.py" = ["E501"]

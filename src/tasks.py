@@ -11,6 +11,7 @@ Este módulo define as tarefas que os agentes executam:
 """
 
 from textwrap import dedent
+
 from crewai import Task
 
 

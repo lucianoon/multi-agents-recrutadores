@@ -224,7 +224,9 @@ requiring real API keys** (fake keys are set in `tests/conftest.py`). The
 practical consequence is that CI is free and deterministic.
 
 ```bash
-pip install -r requirements.txt pytest
+pip install -r requirements.txt pytest ruff mypy
+ruff check .    # lint
+mypy            # type check
 pytest tests/ -v
 ```
 
@@ -252,7 +254,7 @@ Contributions are welcome. To contribute:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-Before opening the PR, make sure `pytest tests/` passes locally.
+Before opening the PR, make sure `ruff check .`, `mypy` and `pytest tests/` pass locally.
 
 ## 📄 License
 
