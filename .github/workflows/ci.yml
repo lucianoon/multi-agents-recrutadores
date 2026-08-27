@@ -27,8 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # crewai 0.28.8 importa pkg_resources, removido do setuptools >= 81
-          pip install "setuptools<81" -r requirements.txt pytest ruff mypy
+          pip install -r requirements.txt pytest ruff mypy
 
       - name: Lint
         run: ruff check .

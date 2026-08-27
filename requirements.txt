@@ -1,5 +1,2 @@
-crewai==0.28.8
-crewai-tools==0.1.6
-langchain==0.1.20
-langchain-openai==0.1.7
-langchain-community==0.0.38
+crewai==1.15.17
+crewai-tools==1.15.17
