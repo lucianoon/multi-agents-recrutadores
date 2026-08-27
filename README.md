@@ -9,19 +9,6 @@
 
 Sistema multi-agente em Python, construído com o framework **CrewAI**, que automatiza a criação de descrições de vagas: pesquisa a cultura da empresa e o mercado, redige a publicação e a revisa, gerando um arquivo `job_posting.md` pronto para uso.
 
-## 📋 Índice
-
-- [Visão Geral](#-visão-geral)
-- [Arquitetura](#-arquitetura)
-- [Pré-requisitos](#-pré-requisitos)
-- [Instalação](#-instalação)
-- [Uso](#-uso)
-- [Estrutura do Projeto](#-estrutura-do-projeto)
-- [Testes](#-testes)
-- [Documentação](#-documentação)
-- [Contribuindo](#-contribuindo)
-- [Licença](#-licença)
-
 ## 🎯 Visão Geral
 
 O sistema orquestra três agentes especializados que executam cinco tarefas em sequência:
@@ -163,34 +150,6 @@ crew = Crew(
 result = crew.kickoff()
 ```
 
-## 📁 Estrutura do Projeto
-
-```
-multi-agents-recrutadores/
-├── .github/
-│   └── workflows/
-│       └── ci.yml                  # Pipeline de CI (GitHub Actions)
-├── src/
-│   ├── agents.py                   # Definição dos 3 agentes e suas ferramentas
-│   ├── tasks.py                    # Definição das 5 tarefas
-│   └── main.py                     # Orquestração (Crew) e execução interativa
-├── tests/
-│   ├── conftest.py                 # Configuração dos testes (chaves falsas, sys.path)
-│   ├── test_agents.py              # Testes estruturais dos agentes
-│   ├── test_tasks.py               # Testes das tarefas e do encadeamento
-│   └── test_main.py                # Teste de fumaça do módulo principal
-├── docs/
-│   ├── documentation.md            # Documentação técnica completa
-│   ├── roteiro_apresentacao.md     # Roteiro para apresentação
-│   └── linkedin_post.md            # Post para LinkedIn
-├── examples/
-│   └── job_description_example.md  # Exemplo de descrição de vaga gerada
-├── QUICK_START.md                  # Guia rápido de início
-├── requirements.txt                # Dependências do projeto
-├── README.md                       # Este arquivo
-└── LICENSE                         # Licença MIT
-```
-
 ## 🧪 Testes
 
 Os testes são **estruturais**: validam a construção dos agentes (papéis, objetivos, ferramentas), das tarefas (descrições, saídas esperadas, arquivo de saída) e o encadeamento entre agentes e tarefas — **sem chamar LLMs nem exigir chaves de API reais** (chaves falsas são definidas em `tests/conftest.py`).
@@ -204,24 +163,14 @@ pytest tests/ -v
 
 Os mesmos três gates rodam automaticamente no GitHub Actions a cada push e pull request para `main` (ver [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
+Antes de abrir um PR, garanta que `ruff check .`, `mypy` e `pytest tests/` passam localmente.
+
 ## 📚 Documentação
 
 - **[Guia Rápido](QUICK_START.md)**: comece a usar em poucos minutos
 - **[Documentação Técnica](docs/documentation.md)**: análise detalhada da arquitetura e componentes
 - **[Roteiro de Apresentação](docs/roteiro_apresentacao.md)**: guia para apresentar a solução
 - **[Post LinkedIn](docs/linkedin_post.md)**: conteúdo para divulgação
-
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Para contribuir:
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-Antes de abrir o PR, garanta que `ruff check .`, `mypy` e `pytest tests/` passam localmente.
 
 ## 📄 Licença
 

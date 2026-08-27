@@ -18,19 +18,6 @@ market, drafts the posting and reviews it, producing a ready-to-use
 > Portuguese**. This README is a translation of the documentation, not of the
 > pipeline's output.
 
-## Table of contents
-
-- [Overview](#-overview)
-- [Architecture](#-architecture)
-- [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Project structure](#-project-structure)
-- [Tests](#-tests)
-- [Documentation](#-documentation)
-- [Contributing](#-contributing)
-- [License](#-license)
-
 ## 🎯 Overview
 
 The system orchestrates three specialized agents running five tasks in sequence:
@@ -187,34 +174,6 @@ crew = Crew(
 result = crew.kickoff()
 ```
 
-## 📁 Project structure
-
-```
-multi-agents-recrutadores/
-├── .github/
-│   └── workflows/
-│       └── ci.yml                  # CI pipeline (GitHub Actions)
-├── src/
-│   ├── agents.py                   # The 3 agents and their tools
-│   ├── tasks.py                    # The 5 tasks
-│   └── main.py                     # Orchestration (Crew) and interactive run
-├── tests/
-│   ├── conftest.py                 # Test setup (fake keys, sys.path)
-│   ├── test_agents.py              # Structural tests for the agents
-│   ├── test_tasks.py               # Tests for the tasks and their chaining
-│   └── test_main.py                # Smoke test for the main module
-├── docs/
-│   ├── documentation.md            # Full technical documentation
-│   ├── roteiro_apresentacao.md     # Presentation script
-│   └── linkedin_post.md            # LinkedIn post
-├── examples/
-│   └── job_description_example.md  # Sample generated job description
-├── QUICK_START.md                  # Quick start guide
-├── requirements.txt                # Project dependencies
-├── README.md                       # This file
-└── LICENSE                         # MIT license
-```
-
 ## 🧪 Tests
 
 The tests are **structural**: they validate how the agents are built (roles,
@@ -233,6 +192,8 @@ pytest tests/ -v
 The same test suite runs automatically on GitHub Actions on every push and pull
 request to `main` (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
+Before opening a PR, make sure `ruff check .`, `mypy` and `pytest tests/` pass locally.
+
 ## 📚 Documentation
 
 The documents below are in Portuguese.
@@ -243,18 +204,6 @@ The documents below are in Portuguese.
 - **[Presentation script](docs/roteiro_apresentacao.md)**: guide for presenting
   the solution
 - **[LinkedIn post](docs/linkedin_post.md)**: outreach content
-
-## 🤝 Contributing
-
-Contributions are welcome. To contribute:
-
-1. Fork the project
-2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-Before opening the PR, make sure `ruff check .`, `mypy` and `pytest tests/` pass locally.
 
 ## 📄 License
 
